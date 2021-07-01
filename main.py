@@ -943,7 +943,6 @@ class ResultsScene(SceneBase):
       box.draw(screen)
 
 
-
 class IndividualQuotaScene(SceneBase):
 
   def __init__(self):
