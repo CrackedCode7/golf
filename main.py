@@ -55,7 +55,7 @@ def IndividualQuota():
 def IndividualSkins():
         
   global skins
-  skins = []
+  skins = {}
 
   for i in range(1, 19):
     lowscore = []
@@ -72,8 +72,10 @@ def IndividualSkins():
         duplicate = True
 
     if duplicate == False: # if there is no duplicate and there is a skin, add the name and hole to a list
-      skins.append([lowscore[0], i])
+      skins[i] = lowscore[0]
 
+  global results
+  results["Individual Skins"] = skins
   print(skins)
 
 def TeamPoints():
@@ -109,6 +111,8 @@ def TeamPoints():
 
         team_points[team] += points
 
+  global results
+  results["Team Points"] = team_points
   print(team_points)
 
 def Shamble():
@@ -163,13 +167,15 @@ def Shamble():
         print(i, lowscore)
         shambleScores[team] += 1
   
+  global results
+  results["Shamble"] = shambleScores
   print(shambleScores)
 
 def TeamSkins():
 
   global teams
   team_skins = {}
-
+  last_skin = 0
   for i in range(1, 19):
     player_low = []
     lowscore = []
@@ -190,10 +196,12 @@ def TeamSkins():
       for team in teams:
         if player_low[0] in teams[team]:
           if team in team_skins:
-            team_skins[team] += 1
+            team_skins[team] += i - last_skin
+            last_skin = i
             print(team, i, lowscore[1])
           else:
-            team_skins[team] = 1
+            team_skins[team] = i - last_skin
+            last_skin = i
             print(team, i, lowscore[1])
     else:
       if len(player_low) >= 3:
@@ -202,10 +210,11 @@ def TeamSkins():
         for team in teams:
           if player_low[0] in teams[team] and player_low[1] in teams[team]:
             if team in team_skins:
-              team_skins[team] += 1
-              print(team, i, lowscore[1])
+              team_skins[team] += i - last_skin
+              last_skin = i
             else:
-              team_skins[team] = 1
+              team_skins[team] = i - last_skin
+              last_skin = i
               print(team, i, lowscore[1])
           else:
             pass
@@ -226,6 +235,7 @@ def TeamSkins():
 
       scores[team]["Hole " + str(k+1)] = total_score
   
+  last_skin = 0
   for i in range(0, 18):
     lowscore = []
     duplicate = False
@@ -242,9 +252,12 @@ def TeamSkins():
         duplicate = True
 
     if duplicate == False:
-      team_skins[lowscore[0]] += 1
+      team_skins[lowscore[0]] += i+1-last_skin
+      last_skin = i+1
       print(team, i+1, lowscore[1])
   
+  global results
+  results["Team Skins"] = team_skins
   print(team_skins)
 
 def TeamQuotaSkins():
@@ -633,6 +646,50 @@ class DisplayIndividualQuotaBox(InputBox):
         active_scene.next = IndividualQuotaScene()
 
 
+class DisplayIndividualSkinsBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+        active_scene.next = IndividualSkinsScene()
+
+
+class DisplayTeamPointsBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+        active_scene.next = TeamPointsScene()
+
+
+class DisplayShambleBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+        active_scene.next = ShambleScene()
+
+
+class DisplayTeamSkinsBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+        active_scene.next = TeamSkinsScene()
+
+
 class QuitBox:
   
   def __init__(self, x, y, w, h, font_size, text="Quit"):
@@ -917,10 +974,21 @@ class ResultsScene(SceneBase):
     self.results_boxes = []
     count = 0
     for result in results:
-      x_size = screen_width//2
-      y_increment = screen_height//6
       if result == "Individual Quota":
         self.results_boxes.append(DisplayIndividualQuotaBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Individual Quota"))
+        count += 1
+      elif result == "Individual Skins":
+        self.results_boxes.append(DisplayIndividualSkinsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Individual Skins"))
+        count += 1
+      elif result == "Team Points":
+        self.results_boxes.append(DisplayTeamPointsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Points"))
+        count += 1
+      elif result == "Shamble":
+        self.results_boxes.append(DisplayShambleBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Shamble"))
+        count += 1
+      elif result == "Team Skins":
+        self.results_boxes.append(DisplayTeamSkinsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Skins"))
+        count += 1
 
     # Combine boxes
     self.boxes = [self.title_box]
@@ -948,15 +1016,219 @@ class IndividualQuotaScene(SceneBase):
   def __init__(self):
     super().__init__()
 
+    global results
+
     # Box that displays title of scene
     self.title_box = InputBox(0, 0, screen_width, screen_height//6, int(screen_height//6), text="Individual Quota")
 
-    for quota in results["Individual Quota"]:
-      print("NEED TO ADD FUNCTIONALITY HERE TO DISPLAY THE ORDERED QUOTA SCORES")
+    # Combine boxes
+    self.boxes = [self.title_box]
+
+    final_results = {k: v for k, v in sorted(results["Individual Quota"].items(), key=lambda item: item[1], reverse=True)}
+
+    num = 1
+    for player in final_results:
+      if num < 7:
+        place_label_text = str(num) + ": " + str(player) + " (" + str(final_results[player]) + ")"
+        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+      else:
+        place_label_text = str(num) + ": " + str(player) + " (" + str(final_results[player]) + ")"
+        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+  
+  def ProcessInput(self, events, pressed_keys):
+    for event in events:
+      for box in self.boxes:
+        box.handle_event(event)
+
+  def Update(self):
+    for box in self.boxes:
+      box.update()
+  
+  def Render(self, screen):
+    screen.fill((255, 255, 255))
+    for box in self.boxes:
+      box.draw(screen)
+
+
+class IndividualSkinsScene(SceneBase):
+  
+  def __init__(self):
+    super().__init__()
+
+    global results
+
+    # Box that displays title of scene
+    self.title_box = InputBox(0, 0, screen_width, screen_height//6, int(screen_height//6), text="Individual Skins")
 
     # Combine boxes
     self.boxes = [self.title_box]
+
+    # Determine skins results and carryovers
+    skins_results = {}
+    for player in players:
+      skins_results[player] = 0
+    last_skin = 0
+    for skin_hole in results["Individual Skins"]:
+      skins_results[results["Individual Skins"][skin_hole]] += (skin_hole - last_skin)
+      last_skin = skin_hole
+    
+    # Make boxes for results
+    skins_results = {k: v for k, v in sorted(skins_results.items(), key=lambda item: item[1], reverse=True)}
+    num = 1
+    for player in skins_results:
+      if num < 7:
+        place_label_text = str(num) + ": " + str(player) + " (" + str(skins_results[player]) + ")"
+        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+      else:
+        place_label_text = str(num) + ": " + str(player) + " (" + str(skins_results[player]) + ")"
+        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
   
+  def ProcessInput(self, events, pressed_keys):
+    for event in events:
+      for box in self.boxes:
+        box.handle_event(event)
+
+  def Update(self):
+    for box in self.boxes:
+      box.update()
+  
+  def Render(self, screen):
+    screen.fill((255, 255, 255))
+    for box in self.boxes:
+      box.draw(screen)
+
+
+class TeamPointsScene(SceneBase):
+  
+  def __init__(self):
+    super().__init__()
+
+    global results
+
+    # Box that displays title of scene
+    self.title_box = InputBox(0, 0, screen_width, screen_height//6, int(screen_height//6), text="Team Points")
+
+    # Combine boxes
+    self.boxes = [self.title_box]
+    
+    # Make boxes for results
+    results["Team Points"] = {k: v for k, v in sorted(results["Team Points"].items(), key=lambda item: item[1], reverse=True)}
+    num = 1
+    for team in results["Team Points"]:
+      if num < 7:
+        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Points"][team]) + ")"
+        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+      else:
+        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Points"][team]) + ")"
+        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+  
+  def ProcessInput(self, events, pressed_keys):
+    for event in events:
+      for box in self.boxes:
+        box.handle_event(event)
+
+  def Update(self):
+    for box in self.boxes:
+      box.update()
+  
+  def Render(self, screen):
+    screen.fill((255, 255, 255))
+    for box in self.boxes:
+      box.draw(screen)
+
+
+class ShambleScene(SceneBase):
+
+  def __init__(self):
+    super().__init__()
+
+    global results
+
+    # Box that displays title of scene
+    self.title_box = InputBox(0, 0, screen_width, screen_height//6, int(screen_height//6), text="Shamble")
+
+    # Combine boxes
+    self.boxes = [self.title_box]
+    
+    # Make boxes for results
+    results["Shamble"] = {k: v for k, v in sorted(results["Shamble"].items(), key=lambda item: item[1], reverse=True)}
+    num = 1
+    for team in results["Shamble"]:
+      if num < 7:
+        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Shamble"][team]) + ")"
+        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+      else:
+        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Shamble"][team]) + ")"
+        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+  
+  def ProcessInput(self, events, pressed_keys):
+    for event in events:
+      for box in self.boxes:
+        box.handle_event(event)
+
+  def Update(self):
+    for box in self.boxes:
+      box.update()
+  
+  def Render(self, screen):
+    screen.fill((255, 255, 255))
+    for box in self.boxes:
+      box.draw(screen)
+
+
+class TeamSkinsScene(SceneBase):
+  
+  def __init__(self):
+    super().__init__()
+
+    global results
+
+    # Box that displays title of scene
+    self.title_box = InputBox(0, 0, screen_width, screen_height//6, int(screen_height//6), text="Team Skins")
+
+    # Combine boxes
+    self.boxes = [self.title_box]
+    
+    # Make boxes for results
+    results["Team Skins"] = {k: v for k, v in sorted(results["Team Skins"].items(), key=lambda item: item[1], reverse=True)}
+    num = 1
+    for team in results["Team Skins"]:
+      if num < 7:
+        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Skins"][team]) + ")"
+        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+      else:
+        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Skins"][team]) + ")"
+        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
   
   def ProcessInput(self, events, pressed_keys):
     for event in events:
