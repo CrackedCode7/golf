@@ -351,6 +351,7 @@ def TeamQuotaSkins():
     if duplicate == False: # if there is no duplicate and there is a skin, add the name and hole to a list
       skins.append([lowscore[0], i])
 
+  results["Team Quota Skins"] = [quotas, skins]
   print("Here are the results for team skins:\n", skins)
 
 # FIX THIS
@@ -455,6 +456,7 @@ def Vegas():
       vegas[team] += vegasScore
   
   print(vegas)
+
 
 class InputBox:
   
@@ -688,6 +690,17 @@ class DisplayTeamSkinsBox(InputBox):
     if event.type == pygame.MOUSEBUTTONDOWN:
       if self.rect.collidepoint(event.pos):
         active_scene.next = TeamSkinsScene()
+
+
+class DisplayTeamQuotaSkinsBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+        active_scene.next = TeamQuotaSkinsScene()
 
 
 class QuitBox:
@@ -989,6 +1002,9 @@ class ResultsScene(SceneBase):
       elif result == "Team Skins":
         self.results_boxes.append(DisplayTeamSkinsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Skins"))
         count += 1
+      elif result == "Team Quota Skins":
+        self.results_boxes.append(DisplayTeamSkinsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Quota/Skins"))
+        count += 1
 
     # Combine boxes
     self.boxes = [self.title_box]
@@ -1243,6 +1259,38 @@ class TeamSkinsScene(SceneBase):
     screen.fill((255, 255, 255))
     for box in self.boxes:
       box.draw(screen)
+
+
+class TeamQuotaSkinsScene(SceneBase):
+  
+  def __init__(self):
+    super().__init__()
+
+    global results
+
+    # Box that displays title of scene
+    self.title_box = InputBox(0, 0, screen_width, screen_height//6, int(screen_height//6), text="Team Quota/Skins")
+
+    # Combine boxes
+    self.boxes = [self.title_box]
+    
+    # Make boxes for results
+    print(results["Team Quota Skins"])
+  
+  def ProcessInput(self, events, pressed_keys):
+    for event in events:
+      for box in self.boxes:
+        box.handle_event(event)
+
+  def Update(self):
+    for box in self.boxes:
+      box.update()
+  
+  def Render(self, screen):
+    screen.fill((255, 255, 255))
+    for box in self.boxes:
+      box.draw(screen)
+
 
 
 def run(width, height, fps, starting_scene):
