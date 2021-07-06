@@ -2,8 +2,8 @@ import pygame
 
 pygame.init()
 
-screen_width = 960
-screen_height = 540
+screen_width = 320
+screen_height = 180
 
 COLOR_INACTIVE = (0, 0, 0)
 COLOR_ACTIVE = pygame.Color("limegreen")
@@ -465,7 +465,7 @@ class InputBox:
     self.color = COLOR_INACTIVE
     self.text = text
     self.font = pygame.font.Font(None, font_size)
-    self.txt_surface = self.font.render(text, True, self.color)
+    self.txt_surface = self.font.render(self.text, True, self.color)
     self.active = False
   
   def handle_event(self, event):
@@ -506,6 +506,25 @@ class InputBox:
     text_rect = self.txt_surface.get_rect(center=self.rect.center)
     screen.blit(self.txt_surface, text_rect)
     pygame.draw.rect(screen, self.color, self.rect, 2)
+
+
+class TotalScoreBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+        global players, active_scene
+        i = 0
+        active_scene.ExtractInfo()
+        for player in players:
+          total_score = players[player]["Total Score"]
+          active_scene.players[i][20].text = str(total_score)
+          active_scene.players[i][20].txt_surface = active_scene.players[i][20].font.render(active_scene.players[i][20].text, True, active_scene.players[i][20].color)
+
+          i += 1
 
 
 class CourseBox(InputBox):
@@ -803,31 +822,36 @@ class ScoreCardScene(SceneBase):
     hole = 1
     for i in range(19):
       if i != 18:
-        self.scores.append(InputBox(screen_width//10+i*0.9*screen_width//19, screen_height//9*2, (9*screen_width/10//19), screen_height//9, int(screen_height//19), text=str(hole)))
+        self.scores.append(InputBox(screen_width//10+i*0.9*screen_width//20, screen_height//9*2, (9*screen_width/10//20), screen_height//9, int(screen_height//20), text=str(hole)))
         hole += 1
 
       elif i == 18:
-        self.scores.append(InputBox(screen_width//10+i*0.9*screen_width//19, screen_height//9*2, (9*screen_width/10//19), screen_height//9, int(screen_height//19), text="H"))
+        self.scores.append(InputBox(screen_width//10+i*0.9*screen_width//20, screen_height//9*2, (9*screen_width/10//20), screen_height//9, int(screen_height//20), text="H"))
+    
+    self.scores.append(InputBox(screen_width//10+19*0.9*screen_width//20, screen_height//9*2, (9*screen_width/10//20), screen_height//9, int(screen_height//20), text="T"))
 
     # Labels for handicaps
-    self.handicap_input = InputBox(0, screen_height//9*3, screen_width//10, screen_height//9, int(screen_height//19), text="HDCP")
+    self.handicap_input = InputBox(0, screen_height//9*3, screen_width//10, screen_height//9, int(screen_height//20), text="HDCP")
 
     # Test boxes for hole score
     self.handicaps = []
     hole = 1
     for i in range(19):
       if i != 18:
-        self.handicaps.append(InputBox(screen_width//10+i*0.9*screen_width//19, screen_height//9*3, (9*screen_width/10//19), screen_height//9, int(screen_height//19), text=str(course_handicaps[hole-1])))
+        self.handicaps.append(InputBox(screen_width//10+i*0.9*screen_width//20, screen_height//9*3, (9*screen_width/10//20), screen_height//9, int(screen_height//20), text=str(course_handicaps[hole-1])))
         hole += 1
       elif i == 18:
-        self.handicaps.append(InputBox(screen_width//10+i*0.9*screen_width//19, screen_height//9*3, (9*screen_width/10//19), screen_height//9, int(screen_height//19)))
+        self.handicaps.append(InputBox(screen_width//10+i*0.9*screen_width//20, screen_height//9*3, (9*screen_width/10//20), screen_height//9, int(screen_height//20)))
+
+    self.handicaps.append(InputBox(screen_width//10+19*0.9*screen_width//20, screen_height//9*3, (9*screen_width/10//20), screen_height//9, int(screen_height//20)))
 
     # Test boxes for player inputs
     self.players = {}
     for j in range(4):
-      self.players[j] = [InputBox(0, screen_height//9*(4+j), screen_width//10, screen_height//9, int(screen_height//19))]
+      self.players[j] = [InputBox(0, screen_height//9*(4+j), screen_width//10, screen_height//9, int(screen_height//20))]
       for i in range(19):
-        self.players[j].append(InputBox(screen_width//10+i*0.9*screen_width//19, screen_height//9*(4+j), (9*screen_width/10//19), screen_height/9, int(screen_height/19)))
+        self.players[j].append(InputBox(screen_width//10+i*0.9*screen_width//20, screen_height//9*(4+j), (9*screen_width/10//20), screen_height/9, int(screen_height/20)))
+      self.players[j].append(TotalScoreBox(screen_width//10+19*0.9*screen_width//20, screen_height//9*(4+j), (9*screen_width/10//20), screen_height/9, int(screen_height/20)))
 
     # Next box for another scorecard
     self.next_box = NextScorecardBox(screen_width-100, screen_height-20, 50, 20, 15, text="Next")
@@ -885,6 +909,7 @@ class ScoreCardScene(SceneBase):
   def ExtractInfo(self):
     global players, course_handicaps
     for player in self.players:
+      player_score = 0
       i = 0
       hole = 1
       for box in self.players[player]:
@@ -894,16 +919,28 @@ class ScoreCardScene(SceneBase):
           else:
             players[box.text] = {}
             name = box.text
+        elif i == 20:
+          continue
         elif i != 19:
           if box.text == "":
             hole += 1
           else:
             players[name]["Hole " + str(hole)] = int(box.text)
+            player_score += int(box.text)
             hole += 1
         elif i == 19:
           players[name]["Handicap"] = int(box.text)
         
         i += 1
+      try:
+        if player_score != 0:
+          players[name]["Total Score"] = player_score
+          player_score = 0
+        else:
+          player_score = 0
+      except:
+        player_score = 0
+        pass
 
     global teams
     teams = {}
@@ -1290,7 +1327,6 @@ class TeamQuotaSkinsScene(SceneBase):
     screen.fill((255, 255, 255))
     for box in self.boxes:
       box.draw(screen)
-
 
 
 def run(width, height, fps, starting_scene):
