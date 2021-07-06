@@ -2,8 +2,8 @@ import pygame
 
 pygame.init()
 
-screen_width = 320
-screen_height = 180
+screen_width = 960
+screen_height = 540
 
 COLOR_INACTIVE = (0, 0, 0)
 COLOR_ACTIVE = pygame.Color("limegreen")
@@ -354,6 +354,7 @@ def TeamQuotaSkins():
   results["Team Quota Skins"] = [quotas, skins]
   print("Here are the results for team skins:\n", skins)
 
+"""
 # FIX THIS
 def TeamPlacePoints():
 
@@ -438,6 +439,7 @@ def TeamPlacePoints():
   results["Team Place Points"] = teamPlacePointsResults
   print(teams)
   print(teamPlacePointsResults)
+"""
 
 def TeamPlacePoints():
 
@@ -476,6 +478,8 @@ def TeamPlacePoints():
         if scores[team]["Hole " + str(i)] == value_tup[0]:
           teamPlacePointsResults[team] += points
     
+    global results
+    results["Team Place Points"] = teamPlacePointsResults
     print(teamPlacePointsResults)
 
 def Vegas():
@@ -510,7 +514,7 @@ class InputBox:
     self.color = COLOR_INACTIVE
     self.text = text
     self.font = pygame.font.Font(None, font_size)
-    self.txt_surface = self.font.render(self.text, True, self.color)
+    self.txt_surface = self.font.render(self.text, True, COLOR_INACTIVE)
     self.active = False
   
   def handle_event(self, event):
@@ -540,7 +544,7 @@ class InputBox:
           self.text = self.text[:-1]
         else:
           self.text += event.unicode
-        self.txt_surface = self.font.render(self.text, True, self.color)
+        self.txt_surface = self.font.render(self.text, True, COLOR_INACTIVE)
 
   def update(self):
     # Resize if too long
@@ -564,12 +568,19 @@ class TotalScoreBox(InputBox):
         global players, active_scene
         i = 0
         active_scene.ExtractInfo()
-        for player in players:
-          total_score = players[player]["Total Score"]
-          active_scene.players[i][20].text = str(total_score)
-          active_scene.players[i][20].txt_surface = active_scene.players[i][20].font.render(active_scene.players[i][20].text, True, active_scene.players[i][20].color)
+        for i in range(4):
 
-          i += 1
+          player_name = active_scene.players[i][0].text
+
+          if player_name == "":
+            continue
+
+          else:
+            print(players[player_name]["Total Score"])
+
+            total_score = players[player_name]["Total Score"]
+            active_scene.players[i][20].text = str(total_score)
+            active_scene.players[i][20].txt_surface = active_scene.players[i][20].font.render(active_scene.players[i][20].text, True, active_scene.players[i][20].color)
 
 
 class BackBox(InputBox):
@@ -788,6 +799,17 @@ class DisplayVegasBox(InputBox):
     if event.type == pygame.MOUSEBUTTONDOWN:
       if self.rect.collidepoint(event.pos):
         active_scene.next = VegasScene()
+
+
+class DisplayTeamPlacePointsBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+        active_scene.next = TeamPlacePointsScene()
 
 
 class QuitBox:
@@ -1112,6 +1134,9 @@ class ResultsScene(SceneBase):
         count += 1
       elif result == "Vegas":
         self.results_boxes.append(DisplayVegasBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Vegas"))
+        count += 1
+      elif result == "Team Place Points":
+        self.results_boxes.append(DisplayTeamPlacePointsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Place Points"))
         count += 1
 
     # Combine boxes
@@ -1479,6 +1504,57 @@ class VegasScene(SceneBase):
     self.boxes = [self.title_box, self.back_box]
 
     final_results = {k: v for k, v in sorted(results["Vegas"].items(), key=lambda item: item[1], reverse=True)}
+
+    num = 1
+    for player in final_results:
+      if num < 7:
+        combined_name = str(teams[player][0]) + "/" + str(teams[player][1])
+
+        place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
+        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+      else:
+        place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
+        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+        self.boxes.append(place_label)
+
+        num += 1
+  
+  
+  def ProcessInput(self, events, pressed_keys):
+    for event in events:
+      for box in self.boxes:
+        box.handle_event(event)
+
+  def Update(self):
+    for box in self.boxes:
+      box.update()
+  
+  def Render(self, screen):
+    screen.fill((255, 255, 255))
+    for box in self.boxes:
+      box.draw(screen)
+
+
+class TeamPlacePointsScene(SceneBase):
+
+  def __init__(self):
+
+    super().__init__()
+
+    global results
+
+    # Box that displays title of scene
+    self.title_box = InputBox(0, 0, 5*screen_width/6, screen_height//6, int(screen_height//6), text="Team Place Points")
+
+    self.back_box = BackBox(5*screen_width/6, 0, screen_width/6, screen_height//6, int(screen_height//6), text="Back")
+
+    # Combine boxes
+    self.boxes = [self.title_box, self.back_box]
+
+    final_results = {k: v for k, v in sorted(results["Team Place Points"].items(), key=lambda item: item[1], reverse=True)}
 
     num = 1
     for player in final_results:
