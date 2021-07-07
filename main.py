@@ -1282,18 +1282,11 @@ class TeamPointsScene(SceneBase):
     results["Team Points"] = {k: v for k, v in sorted(results["Team Points"].items(), key=lambda item: item[1], reverse=True)}
     num = 1
     for team in results["Team Points"]:
-      if num < 7:
-        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Points"][team]) + ")"
-        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
+      place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Points"][team]) + ")"
+      place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width, screen_height//8, int(screen_height//8), text=place_label_text)
+      self.boxes.append(place_label)
 
-        num += 1
-      else:
-        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Points"][team]) + ")"
-        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
-
-        num += 1
+      num += 1
   
   def ProcessInput(self, events, pressed_keys):
     for event in events:
@@ -1329,18 +1322,11 @@ class ShambleScene(SceneBase):
     results["Shamble"] = {k: v for k, v in sorted(results["Shamble"].items(), key=lambda item: item[1], reverse=True)}
     num = 1
     for team in results["Shamble"]:
-      if num < 7:
-        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Shamble"][team]) + ")"
-        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
+      place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Shamble"][team]) + ")"
+      place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width, screen_height//8, int(screen_height//8), text=place_label_text)
+      self.boxes.append(place_label)
 
-        num += 1
-      else:
-        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Shamble"][team]) + ")"
-        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
-
-        num += 1
+      num += 1
   
   def ProcessInput(self, events, pressed_keys):
     for event in events:
@@ -1376,18 +1362,11 @@ class TeamSkinsScene(SceneBase):
     results["Team Skins"] = {k: v for k, v in sorted(results["Team Skins"].items(), key=lambda item: item[1], reverse=True)}
     num = 1
     for team in results["Team Skins"]:
-      if num < 7:
-        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Skins"][team]) + ")"
-        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
+      place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Skins"][team]) + ")"
+      place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
+      self.boxes.append(place_label)
 
-        num += 1
-      else:
-        place_label_text = str(num) + ": " + str(teams[team][0]) + "/" + str(teams[team][1]) + " (" + str(results["Team Skins"][team]) + ")"
-        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
-
-        num += 1
+      num += 1
   
   def ProcessInput(self, events, pressed_keys):
     for event in events:
@@ -1507,20 +1486,13 @@ class VegasScene(SceneBase):
 
     num = 1
     for player in final_results:
-      if num < 7:
-        combined_name = str(teams[player][0]) + "/" + str(teams[player][1])
+      combined_name = str(teams[player][0]) + "/" + str(teams[player][1])
 
-        place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
-        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
+      place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
+      place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width, screen_height//8, int(screen_height//8), text=place_label_text)
+      self.boxes.append(place_label)
 
-        num += 1
-      else:
-        place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
-        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
-
-        num += 1
+      num += 1
   
   
   def ProcessInput(self, events, pressed_keys):
@@ -1558,20 +1530,13 @@ class TeamPlacePointsScene(SceneBase):
 
     num = 1
     for player in final_results:
-      if num < 7:
-        combined_name = str(teams[player][0]) + "/" + str(teams[player][1])
+      combined_name = str(teams[player][0]) + "/" + str(teams[player][1])
 
-        place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
-        place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
+      place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
+      place_label = InputBox(0, screen_height//6+(num-1)*screen_height//8, screen_width, screen_height//8, int(screen_height//8), text=place_label_text)
+      self.boxes.append(place_label)
 
-        num += 1
-      else:
-        place_label_text = str(num) + ": " + str(combined_name) + " (" + str(final_results[player]) + ")"
-        place_label = InputBox(screen_width//2, screen_height//6+(num-7)*screen_height//8, screen_width//2, screen_height//8, int(screen_height//8), text=place_label_text)
-        self.boxes.append(place_label)
-
-        num += 1
+      num += 1
   
   
   def ProcessInput(self, events, pressed_keys):
