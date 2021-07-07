@@ -695,7 +695,41 @@ class LoadScorecardBox(InputBox):
             players[player]["Hole " + str(i) + " Net"] = players[player]["Hole " + str(i)] - 1
           else:
             players[player]["Hole " + str(i) + " Net"] = players[player]["Hole " + str(i)]
-        
+
+
+class SaveScorecardBox(InputBox):
+  
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+
+        # Code to exort csv data
+        self.f = self.file_save()
+        with open(self.f, "w", newline="") as writefile:
+          writer = csv.writer(writefile)
+          for player in players:
+            row = []
+            row.append(player)
+            for i in range(1, 19):
+              row.append(players[player]["Hole " + str(i)])
+            row.append(players[player]["Handicap"])
+
+            writer.writerow(row)
+
+  
+  def file_save(self):
+    top = tkinter.Tk()
+    top.withdraw()
+    f = tkinter.filedialog.asksaveasfilename(parent=top, defaultextension=".csv")
+    top.destroy()
+
+    if f is None:
+      return
+    else:
+      return f
 
 
 class IndividualQuotaGameBox(InputBox):
@@ -1017,13 +1051,16 @@ class ScoreCardScene(SceneBase):
       self.players[j].append(TotalScoreBox(screen_width//10+19*0.9*screen_width//20, screen_height//9*(4+j), (9*screen_width/10//20), screen_height/9, int(screen_height/20)))
 
     # Next box for another scorecard
-    self.next_box = NextScorecardBox(screen_width-100, screen_height-20, 50, 20, 15, text="Next")
+    self.next_box = NextScorecardBox(5*screen_width//7, 8*screen_height//9, screen_width//7, screen_height//9, screen_height//15, text="Next")
 
     # Box to manually load data from csv
-    self.load_box = LoadScorecardBox(0, screen_height-20, 50, 20, 15, text="Load")
+    self.load_box = LoadScorecardBox(0, 8*screen_height//9, screen_width//7, screen_height//9, screen_height//15, text="Load")
+
+    # Box to save data to csv
+    self.save_box = SaveScorecardBox(screen_width//7, 8*screen_height//9, screen_width//7, screen_height//9, screen_height//15, text="Save")
 
     # Combine all text boxes
-    self.boxes = [self.course_title_box, self.hole_input, self.handicap_input, self.next_box, self.load_box]
+    self.boxes = [self.course_title_box, self.hole_input, self.handicap_input, self.next_box, self.load_box, self.save_box]
     for score in self.scores:
       self.boxes.append(score)
     for handicap in self.handicaps:
@@ -1033,7 +1070,7 @@ class ScoreCardScene(SceneBase):
         self.boxes.append(input_box)
 
     # Box to quit and extract scores
-    self.quit = QuitBox(screen_width-50, screen_height-20, 50, 20, 15)
+    self.quit = QuitBox(6*screen_width//7, 8*screen_height//9, screen_width//7, screen_height//9, screen_height//15)
 
   def ProcessInput(self, events, pressed_keys):
     for event in events:
