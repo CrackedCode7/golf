@@ -1,9 +1,12 @@
 import pygame
+import tkinter
+import tkinter.filedialog
+import csv
 
 pygame.init()
 
-screen_width = 960
-screen_height = 540
+screen_width = 320
+screen_height = 180
 
 COLOR_INACTIVE = (0, 0, 0)
 COLOR_ACTIVE = pygame.Color("limegreen")
@@ -263,7 +266,6 @@ def TeamSkins():
 def TeamQuotaSkins():
 
   ###############################################################
-  # ADD NET SCORE AS THE GAME FOR THIS DAY
   # SPLIT MONEY WITH TEAMMATE FOR TEAM QUOTA AND TEAM SKINS
 
   # These games print only one of the player's names per team
@@ -625,6 +627,77 @@ class NextScorecardBox(InputBox):
         active_scene.next = ScoreCardScene()
 
 
+class LoadScorecardBox(InputBox):
+
+  def __init__(self, x, y, w, h, font_size, text=""):
+    super().__init__(x, y, w, h, font_size, text)
+  
+  def handle_event(self, event):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      if self.rect.collidepoint(event.pos):
+
+        # Code to pull in csv data to use instead of manually inputting
+        self.file_name = self.prompt_file()
+        print(self.file_name)
+        self.load_csv_data(self.file_name)
+
+
+        active_scene.next = GameSelectionScene()
+  
+  def prompt_file(self):
+    top = tkinter.Tk()
+    top.withdraw()
+    file_name = tkinter.filedialog.askopenfilename(parent=top)
+    top.destroy()
+    return file_name
+  
+  def load_csv_data(self, filename):
+    with open(filename) as csvfile:
+      reader = csv.reader(csvfile)
+      global players
+      players = {}
+      for row in reader:
+        # Load player data into variable
+        name = row[0]
+        players[name] = {}
+        player_score = 0
+        for i in range(1, 19):
+          players[name]["Hole " + str(i)] = int(row[i])
+          player_score += int(row[i])
+        
+        players[name]["Total Score"] = player_score
+        players[name]["Handicap"] = int(row[19])
+      
+      # Set teams
+      global teams
+      teams = {}
+      i = 0
+      j = 1
+      for player in players:
+        if i % 2 == 0:
+          teams[j] = []
+          teams[j].append(player)
+          i += 1
+        else:
+          teams[j].append(player)
+          j += 1
+          i += 1
+      
+      # Calculate and update net scores
+      global course_handicaps
+      for player in players:
+        handicap = players[player]["Handicap"]
+
+        for i in range(1, 19):
+          if handicap - course_handicaps[i-1] >= 18:
+            players[player]["Hole " + str(i) + " Net"] = players[player]["Hole " + str(i)] - 2
+          elif handicap - course_handicaps[i-1] >= 0:
+            players[player]["Hole " + str(i) + " Net"] = players[player]["Hole " + str(i)] - 1
+          else:
+            players[player]["Hole " + str(i) + " Net"] = players[player]["Hole " + str(i)]
+        
+
+
 class IndividualQuotaGameBox(InputBox):
 
   def __init__(self, x, y, w, h, font_size, text=""):
@@ -946,8 +1019,11 @@ class ScoreCardScene(SceneBase):
     # Next box for another scorecard
     self.next_box = NextScorecardBox(screen_width-100, screen_height-20, 50, 20, 15, text="Next")
 
+    # Box to manually load data from csv
+    self.load_box = LoadScorecardBox(0, screen_height-20, 50, 20, 15, text="Load")
+
     # Combine all text boxes
-    self.boxes = [self.course_title_box, self.hole_input, self.handicap_input, self.next_box]
+    self.boxes = [self.course_title_box, self.hole_input, self.handicap_input, self.next_box, self.load_box]
     for score in self.scores:
       self.boxes.append(score)
     for handicap in self.handicaps:
@@ -1115,28 +1191,28 @@ class ResultsScene(SceneBase):
     count = 0
     for result in results:
       if result == "Individual Quota":
-        self.results_boxes.append(DisplayIndividualQuotaBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Individual Quota"))
+        self.results_boxes.append(DisplayIndividualQuotaBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Individual Quota"))
         count += 1
       elif result == "Individual Skins":
-        self.results_boxes.append(DisplayIndividualSkinsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Individual Skins"))
+        self.results_boxes.append(DisplayIndividualSkinsBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Individual Skins"))
         count += 1
       elif result == "Team Points":
-        self.results_boxes.append(DisplayTeamPointsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Points"))
+        self.results_boxes.append(DisplayTeamPointsBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Team Points"))
         count += 1
       elif result == "Shamble":
-        self.results_boxes.append(DisplayShambleBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Shamble"))
+        self.results_boxes.append(DisplayShambleBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Shamble"))
         count += 1
       elif result == "Team Skins":
-        self.results_boxes.append(DisplayTeamSkinsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Skins"))
+        self.results_boxes.append(DisplayTeamSkinsBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Team Skins"))
         count += 1
       elif result == "Team Quota Skins":
-        self.results_boxes.append(DisplayTeamQuotaSkinsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Quota/Skins"))
+        self.results_boxes.append(DisplayTeamQuotaSkinsBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Team Quota/Skins"))
         count += 1
       elif result == "Vegas":
-        self.results_boxes.append(DisplayVegasBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Vegas"))
+        self.results_boxes.append(DisplayVegasBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Vegas"))
         count += 1
       elif result == "Team Place Points":
-        self.results_boxes.append(DisplayTeamPlacePointsBox(screen_width//4, (count+2)*screen_height//6, screen_width//2, screen_height//6, int(screen_height//6), text="Team Place Points"))
+        self.results_boxes.append(DisplayTeamPlacePointsBox(0, (count+2)*screen_height//6, screen_width, screen_height//6, int(screen_height//6), text="Team Place Points"))
         count += 1
 
     # Combine boxes
