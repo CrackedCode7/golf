@@ -471,8 +471,7 @@ def TeamPlacePoints():
     print(teamPlacePoints[i])
 
     places_distributed = 0
-    # EDIT FOR 6 TEAMS WHEN VERIFIED WORKING
-    points_list = [6, 4, 2, 0]
+    points_list = [10, 8, 6, 4, 2, 0]
     for value_tup in teamPlacePoints[i]:
       points = sum(points_list[places_distributed:value_tup[1]+places_distributed]) / value_tup[1]
       places_distributed += value_tup[1]
